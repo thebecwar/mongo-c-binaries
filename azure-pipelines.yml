@@ -13,6 +13,8 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - checkout: 
+      submodules: true
     - script: 'echo $(Build.SourceBranchName) > mongo-c-driver/VERSION_CURRENT'
       displayName: 'Generate release version tag'
     - task: CMake@1
@@ -51,6 +53,8 @@ jobs:
     variables:
       vcvars: C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat 
     steps:
+    - checkout: 
+      submodules: true
     - script: 'echo $(Build.SourceBranchName) > mongo-c-driver/VERSION_CURRENT'
       displayName: 'Generate release version tag'
     - task: CMake@1
