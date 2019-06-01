@@ -36,7 +36,7 @@ jobs:
     - task: ArchiveFiles@2
       displayName: 'Packaging Release Files'
       inputs:
-        rootFolderOrFile: '.mongo-c-driver/cmake-build/cmake-dist'
+        rootFolderOrFile: './mongo-c-driver/cmake-build/cmake-dist'
         includeRootFolder: false
         archiveType: 'tar'
         archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.SourceBranchName)-$(Build.BuildId).tar.gz'
@@ -75,7 +75,7 @@ jobs:
     - task: ArchiveFiles@2
       displayName: 'Packaging Release Files'
       inputs:
-        rootFolderOrFile: '.mongo-c-driver/cmake-build/cmake-dist'
+        rootFolderOrFile: './mongo-c-driver/cmake-build/cmake-dist'
         includeRootFolder: false
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/win-x64-$(Build.SourceBranchName)-$(Build.BuildId).zip'
