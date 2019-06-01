@@ -1,0 +1,105 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - release/*
+
+jobs:
+  - job: 'ubuntu'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: 'echo $(Build.SourceBranchName) > mongo-c-driver/VERSION_CURRENT'
+      displayName: 'Generate release version tag'
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'mongo-c-driver/cmake-build'
+        cmakeArgs: '-DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -DCMAKE_INSTALL_PREFIX=./cmake-dist -DCMAKE_BUILD_TYPE=Release ..'
+    - task: CmdLine@2
+      displayName: 'Building library with make'
+      inputs:
+        script: 'make'
+        workingDirectory: 'mongo-c-driver/cmake-build'
+        failOnStderr: true
+    - task: CmdLine@2
+      displayName: 'Generating local library install'
+      inputs:
+        script: 'make install'
+        workingDirectory: 'mongo-c-driver/cmake-build'
+        failOnStderr: true
+    - task: ArchiveFiles@2
+      displayName: 'Packaging Release Files'
+      inputs:
+        rootFolderOrFile: '.mongo-c-driver/cmake-build/cmake-dist'
+        includeRootFolder: false
+        archiveType: 'tar'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.SourceBranchName)-$(Build.BuildId).tar.gz'
+        replaceExistingArchive: true
+        verbose: true
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(Build.SourceBranchName).release'
+        publishLocation: 'Container'
+  - job: 'windows'
+    pool:
+      vmImage: vs2017-win2016
+    variables:
+      vcvars: C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat 
+    steps:
+    - script: 'echo $(Build.SourceBranchName) > mongo-c-driver/VERSION_CURRENT'
+      displayName: 'Generate release version tag'
+    - task: CMake@1
+      displayName: 'Running CMake'
+      inputs:
+        workingDirectory: 'mongo-c-driver/cmake-build'
+        cmakeArgs: '-G "Visual Studio 15 2017 Win64" -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -DCMAKE_INSTALL_PREFIX=./cmake-dist -DCMAKE_BUILD_TYPE=Release ..'
+    - task: MSBuild@1
+      displayName: 'Building'
+      inputs:
+        solution: 'mongo-c-driver\cmake-build\ALL_BUILD.vcxproj'
+        msbuildArchitecture: 'x64'
+        configuration: 'RelWithDebInfo'
+    - task: MSBuild@1
+      displayName: 'Generating local install'
+      inputs:
+        solution: 'mongo-c-driver\cmake-build\INSTALL.vcxproj'
+    - task: ArchiveFiles@2
+      displayName: 'Packaging Release Files'
+      inputs:
+        rootFolderOrFile: '.mongo-c-driver/cmake-build/cmake-dist'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/win-x64-$(Build.SourceBranchName)-$(Build.BuildId).zip'
+        replaceExistingArchive: true
+        verbose: true
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(Build.SourceBranchName).release'
+        publishLocation: 'Container'
+  - job: 'publish'
+    dependsOn:
+      - ubuntu
+      - windows
+    steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'specific'
+          downloadPath: '$(Build.ArtifactStagingDirectory)'
+      - task: GitHubRelease@0
+        displayName: 'Publish Artifacts to Github'
+        inputs:
+          gitHubConnection: GithubAccess
+          repositoryName: $(Build.Repository.Name)
+          action: edit
+          assets: $(Build.ArtifactStagingDirectory)/**/*
+          tagSource: manual
+          tag: $(Build.SourceBranchName)-Release
+          title: V$(Build.SourceBranchName)
+
