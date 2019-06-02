@@ -1,0 +1,24 @@
+{
+  "name": "libmongoc-bin",
+  "version": "0.1.0",
+  "description": "Meta package for libmongoc binaries.",
+  "main": "",
+  "scripts": {
+    "postinstall": "node install.js",
+    "preuninstall": "node uninstall.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thebecwar/mongo-c-binaries.git"
+  },
+  "author": "Mark Becwar",
+  "license": "Beerware",
+  "bugs": {
+    "url": "https://github.com/thebecwar/mongo-c-binaries/issues"
+  },
+  "homepage": "https://github.com/thebecwar/mongo-c-binaries#readme",
+  "dependencies": {
+    "@octokit/rest": "^16.27.3"
+  }
+}
