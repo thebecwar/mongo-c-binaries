@@ -13,7 +13,7 @@ jobs:
     - task: Bash@3 # Bash so that we know it's cp and not copy
       displayName: 'Generate release version tag'
       inputs:
-        script: cp "VERSION_CURRENT" "mongo-c-driver"
+        script: cp "./VERSION_CURRENT" "./mongo-c-driver/"
     - task: CMake@1
       inputs:
         workingDirectory: 'mongo-c-driver/cmake-build'
@@ -55,7 +55,7 @@ jobs:
     - task: Bash@3 # Bash so that we know it's cp and not copy
       displayName: 'Generate release version tag'
       inputs:
-        script: cp "VERSION_CURRENT" "mongo-c-driver"
+        script: cp "./VERSION_CURRENT" "./mongo-c-driver/"
     - task: CMake@1
       displayName: 'Running CMake'
       inputs:
