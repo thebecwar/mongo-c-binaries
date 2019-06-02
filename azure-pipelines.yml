@@ -115,7 +115,6 @@ jobs:
           command: 'publish'
           workingDir: 'libmongoc-bin'
           verbose: true
-          publishRegistry: 'useFeed'
-          publishFeed: '61f5fd0d-e057-4825-95cf-fcadcdf5315e'
+          publishEndpoint: 'NPM'
 
 
