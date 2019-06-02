@@ -1,0 +1,12 @@
+{
+  "include_dirs": [
+    "BASE_DIR/include/libbson-1.0",
+    "BASE_DIR/include/libmongoc-1.0"
+  ],
+  "library_dirs": [
+    "BASE_DIR/lib"
+  ],
+  "libraries": [
+LIBRARIES
+  ]
+}

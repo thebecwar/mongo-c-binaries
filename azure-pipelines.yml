@@ -1,8 +1,3 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
   branches:
     include:
@@ -15,8 +10,10 @@ jobs:
     steps:
     - checkout: self
       submodules: true
-    - script: 'echo $(Build.SourceBranchName) > mongo-c-driver/VERSION_CURRENT'
+    - task: Bash@3 # Bash so that we know it's cp and not copy
       displayName: 'Generate release version tag'
+      inputs:
+        script: cp "VERSION_CURRENT" "mongo-c-driver"
     - task: CMake@1
       inputs:
         workingDirectory: 'mongo-c-driver/cmake-build'
@@ -39,7 +36,7 @@ jobs:
         rootFolderOrFile: './mongo-c-driver/cmake-build/cmake-dist'
         includeRootFolder: false
         archiveType: 'tar'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.SourceBranchName)-$(Build.BuildId).tar.gz'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/linux-x64-$(Build.SourceBranchName)-$(Build.BuildId).tar.gz'
         replaceExistingArchive: true
         verbose: true
     - task: PublishBuildArtifacts@1
@@ -55,8 +52,10 @@ jobs:
     steps:
     - checkout: self
       submodules: true
-    - script: 'echo $(Build.SourceBranchName) > mongo-c-driver/VERSION_CURRENT'
+    - task: Bash@3 # Bash so that we know it's cp and not copy
       displayName: 'Generate release version tag'
+      inputs:
+        script: cp "VERSION_CURRENT" "mongo-c-driver"
     - task: CMake@1
       displayName: 'Running CMake'
       inputs:
@@ -105,7 +104,7 @@ jobs:
           assets: $(Build.ArtifactStagingDirectory)/**/*
           tagSource: manual
           tag: $(Build.SourceBranchName)-Release
-          title: V$(Build.SourceBranchName)
+          title: v$(Build.SourceBranchName)
   - job: 'package'
     dependsOn:
       - publish

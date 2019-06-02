@@ -1,6 +1,6 @@
 {
   "name": "libmongoc-bin",
-  "version": "0.1.0",
+  "version": "1.14.0",
   "description": "Meta package for libmongoc binaries.",
   "main": "",
   "scripts": {

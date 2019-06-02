@@ -5,3 +5,4 @@ share
 
 *.tar.gz
 *.zip
+*.gypi

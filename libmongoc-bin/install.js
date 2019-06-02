@@ -2,19 +2,65 @@ const child_process = require('child_process');
 const process = require('process');
 const fs = require('fs');
 const rest = require('@octokit/rest');
+const path = require('path');
+
+const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8'));
+const version = pkg.version;
+
+// Generate template
+let template = fs.readFileSync(path.resolve(__dirname, 'libmongoc.gypi.tplt'), 'utf8');
+let staticLibs = null;
+let libs = null;
+if (process.platform === 'win32') {
+  libs = [];
+  libs.push('bson-1.0.lib');
+  libs.push('mongoc-1.0.lib');
+
+  staticLibs = [];
+  staticLibs.push('bson-static-1.0.lib');
+  staticLibs.push('mongoc-static-1.0.lib');
+}
+else if (process.platform === 'linux') {
+  libs = [];
+  libs.push('-l:libbson-1.0.so');
+  libs.push('-l:libmongoc-1.0.so');
+
+  staticLibs = [];
+  staticLibs.push('-l:libbson-static-1.0.a');
+  staticLibs.push('-l:libmongoc-static-1.0.a');
+}
+if (libs) {
+  libs = libs.map(x => `    "${x}",`).join('\r\n');
+  let output = template.replace(/BASE_DIR/g, __dirname);
+  output = output.replace('LIBRARIES', libs);
+  output = output.replace(/\\/g, '\\\\');
+  fs.writeFileSync(path.resolve(__dirname, 'libmongoc.gypi'), output);
+}
+if (staticLibs) {
+  staticLibs = staticLibs.map(x => `    "${x}",`).join('\r\n');
+  let output = template.replace(/BASE_DIR/g, __dirname);
+  output = output.replace('LIBRARIES', staticLibs);
+  output = output.replace(/\\/g, '\\');
+  fs.writeFileSync(path.resolve(__dirname, 'libmongoc-static.gypi'), output);
+}
+
 
 const octokit = new rest();
-
-octokit.repos.getLatestRelease({
+octokit.repos.listReleases({
   owner: 'thebecwar',
   repo: 'mongo-c-binaries'
-}).then(release => {
+}).then(releases => {
+  let release = releases.data.find(x => x.name === 'v' + version);
+  if (!release) {
+    console.log(`No matching release version. Binaries for ${version} are not available.`);
+    process.exit(1);
+  }
   let asset = null;
   if (process.platform === 'win32' && process.arch === 'x64') {
-    asset = release.data.assets.find(x => x.name.startsWith('win-x64'));
+    asset = release.assets.find(x => x.name.startsWith('win-x64'));
   }
   else if (process.platform === 'linux' && process.arch === 'x64') {
-    asset = release.data.assets.find(x => x.name.startsWith('linux-x64'));
+    asset = release.assets.find(x => x.name.startsWith('linux-x64'));
   }
 
   if (!asset) {

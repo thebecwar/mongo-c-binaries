@@ -21,3 +21,5 @@ deleteFiles(`${__dirname}/include`);
 deleteFiles(`${__dirname}/lib`);
 deleteFiles(`${__dirname}/share`);
 
+if (fs.existsSync('./libmongoc.gypi')) fs.unlinkSync('./libmongoc.gypi');
+if (fs.existsSync('./libmongoc-static.gypi')) fs.unlinkSync('./libmongoc-static.gypi');
