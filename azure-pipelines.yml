@@ -89,10 +89,57 @@ jobs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: '$(Build.SourceBranchName).release'
         publishLocation: 'Container'
+  - job: 'macos'
+    pool:
+      vmImage: 'macOS-10.13'
+    steps:
+    - checkout: self
+      submodules: true
+    - task: CopyFiles@2
+      displayName: 'Generate release version tag'
+      inputs:
+        Contents: 'VERSION_CURRENT'
+        TargetFolder: 'mongo-c-driver'
+        OverWrite: true
+    - task: CmdLine@2
+      displayName: 'Select XCode'
+      inputs:
+        script: 'xcode-select --install'
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'mongo-c-driver/cmake-build'
+        cmakeArgs: '-DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF -DCMAKE_INSTALL_PREFIX=./cmake-dist -DCMAKE_BUILD_TYPE=Release ..'
+    - task: CmdLine@2
+      displayName: 'Building library with make'
+      inputs:
+        script: 'make'
+        workingDirectory: 'mongo-c-driver/cmake-build'
+        failOnStderr: true
+    - task: CmdLine@2
+      displayName: 'Generating local library install'
+      inputs:
+        script: 'make install'
+        workingDirectory: 'mongo-c-driver/cmake-build'
+        failOnStderr: true
+    - task: ArchiveFiles@2
+      displayName: 'Packaging Release Files'
+      inputs:
+        rootFolderOrFile: './mongo-c-driver/cmake-build/cmake-dist'
+        includeRootFolder: false
+        archiveType: 'tar'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/macos-x64-$(Build.SourceBranchName)-$(Build.BuildId).tar.gz'
+        replaceExistingArchive: true
+        verbose: true
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(Build.SourceBranchName).release'
+        publishLocation: 'Container'
   - job: 'publish'
     dependsOn:
       - ubuntu
       - windows
+      - macos
     steps:
       - task: DownloadBuildArtifacts@0
         inputs:
