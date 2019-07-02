@@ -101,10 +101,6 @@ jobs:
         Contents: 'VERSION_CURRENT'
         TargetFolder: 'mongo-c-driver'
         OverWrite: true
-    - task: CmdLine@2
-      displayName: 'Select XCode'
-      inputs:
-        script: 'xcode-select --install'
     - task: CMake@1
       inputs:
         workingDirectory: 'mongo-c-driver/cmake-build'
