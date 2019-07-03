@@ -5,7 +5,10 @@ const rest = require('@octokit/rest');
 const path = require('path');
 
 const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'package.json'), 'utf8'));
-const version = pkg.version;
+let version = pkg.version;
+if (version.includes('-')) {
+  version = version.split('-')[0];
+}
 
 // Generate template
 let template = fs.readFileSync(path.resolve(__dirname, 'libmongoc.gypi.tplt'), 'utf8');
