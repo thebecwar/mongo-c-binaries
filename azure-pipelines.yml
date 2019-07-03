@@ -108,13 +108,13 @@ jobs:
     - task: CmdLine@2
       displayName: 'Building library with make'
       inputs:
-        script: 'make'
+        script: 'make 2>&1'
         workingDirectory: 'mongo-c-driver/cmake-build'
         failOnStderr: true
     - task: CmdLine@2
       displayName: 'Generating local library install'
       inputs:
-        script: 'make install'
+        script: 'make install 2>&1'
         workingDirectory: 'mongo-c-driver/cmake-build'
         failOnStderr: true
     - task: ArchiveFiles@2

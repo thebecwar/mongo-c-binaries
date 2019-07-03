@@ -20,7 +20,7 @@ if (process.platform === 'win32') {
   staticLibs.push('bson-static-1.0.lib');
   staticLibs.push('mongoc-static-1.0.lib');
 }
-else if (process.platform === 'linux') {
+else if (process.platform === 'linux' || process.platform === 'darwin') {
   libs = [];
   libs.push('-l:libbson-1.0.so');
   libs.push('-l:libmongoc-1.0.so');
@@ -61,6 +61,9 @@ octokit.repos.listReleases({
   }
   else if (process.platform === 'linux' && process.arch === 'x64') {
     asset = release.assets.find(x => x.name.startsWith('linux-x64'));
+  }
+  else if (process.platform === 'darwin' && process.arch === 'x64') {
+    asset = release.assets.find(x => x.name.startsWith('macos-x64'));
   }
 
   if (!asset) {
